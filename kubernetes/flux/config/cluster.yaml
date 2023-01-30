@@ -6,14 +6,10 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m
+  # 6a: Change this to your user and repo names
+  url: ssh://git@github.com/digadood/homeops
   ref:
     branch: main
-  url: "ssh://git@github.com/digadood/homeops"
-  ignore: |
-    # exclude all
-    /*
-    # include kubernetes directory
-    !/kubernetes
   secretRef:
     name: github-deploy-key
 ---
