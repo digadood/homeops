@@ -62,7 +62,7 @@ spec:
           hajimari.io/enable: "true"
           hajimari.io/icon: television-classic
         hosts:
-          - host: &host "sonarr.${SECRET_DOMAIN}"
+          - host: &host "{{ .Release.Name }}.${SECRET_DOMAIN}"
             paths:
               - path: /
                 pathType: Prefix
