@@ -57,12 +57,12 @@ spec:
     ingress:
       main:
         enabled: true
-        ingressClassName: "nginx"
+        ingressClassName: nginx
         annotations:
           hajimari.io/enable: "true"
           hajimari.io/icon: television-classic
         hosts:
-          - host: &host sonarr.${PUBLIC_DOMAIN}
+          - host: &host "sonarr.${SECRET_DOMAIN}"
             paths:
               - path: /
                 pathType: Prefix
