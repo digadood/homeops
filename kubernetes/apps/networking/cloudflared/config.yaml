@@ -1,6 +1,6 @@
 ---
 # Add CNAME record -> 4f4293d6-424a-4d06-9e4f-83dd262e8756.cfargotunnel.com
-tunnel: "4f4293d6-424a-4d06-9e4f-83dd262e8756"
+tunnel: "c1f15eb3-34a8-40dc-a053-594f9f133602"
 credentials-file: /etc/cloudflared/tunnel.json
 no-autoupdate: true
 originRequest:
