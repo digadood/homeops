@@ -5,59 +5,54 @@ metadata:
   name: cloudflared
   namespace: networking
 spec:
-  interval: 15m
+  interval: 5m
+  releaseName: cloudflared
   chart:
     spec:
-      chart: app-template
-      version: 1.2.1
+      chart: cloudflared
+      version: 0.1.2
       sourceRef:
         kind: HelmRepository
-        name: bjw-s
+        name: xunholy-charts
         namespace: flux-system
+      interval: 5m
+  install:
+    timeout: 10m
+    replace: true
+    crds: CreateReplace
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      remediateLastFailure: true
+      retries: 3
+      strategy: rollback
+    cleanupOnFail: true
+    crds: CreateReplace
+  test:
+    enable: true
+  rollback:
+    recreate: true
+    force: true
+    cleanupOnFail: true
+  uninstall:
+    keepHistory: false
+  maxHistory: 3
   values:
     image:
-      repository: cloudflare/cloudflared
-      tag: 2023.1.0
-    args: [tunnel, run]
-    env:
-      TUNNEL_METRICS: 0.0.0.0:2000
-      TUNNEL_TOKEN:
-        valueFrom:
-          secretKeyRef:
-            name: tunnel-credentials
-            key: token
-    resources:
-      requests:
-        cpu: 10m
-        memory: 50Mi
-      limits:
-        cpu: 500m
-        memory: 1Gi
-    service:
-      main:
-        ports:
-          http:
-            port: 2000
-    probes:
-      liveness:
-          custom: true
-          spec:
-            httpGet:
-              # Cloudflared has a /ready endpoint which returns 200 if and only if
-              # it has an active connection to the edge.
-              path: /ready
-              port: 2000
-            failureThreshold: 1
-            initialDelaySeconds: 10
-            periodSeconds: 10
-    serviceMonitor:
-      main:
-        enabled: true
-        endpoints:
-        - port: http
-          interval: 1m
-          metricRelabelings:
-          - action: keep
-            regex: quic.*|cloudflared.*
-            sourceLabels:
-            - __name__
+      repository: raspbernetes/cloudflared
+      tag: "2022.8.2"
+    cloudflared:
+      # Tunnel ID should be unique per instance of running cloudflared
+      tunnelID: 48ef015d-cb65-4177-8a9d-fe69bad9fedc
+      # This is a reference to an existing secret containing the credentials;
+      existingSecret: tunnel-credentials
+      # Ingress hosts are directly copied into the configmap;
+      # Read: https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress
+#      ingress:
+#        - hostname: api.raspbernetes.com
+#          service: tcp://kubernetes.default.svc.cluster.local:443
+#          originRequest:
+#            proxyType: socks
+#        - service: http_status:404
