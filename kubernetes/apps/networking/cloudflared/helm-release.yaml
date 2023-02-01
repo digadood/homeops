@@ -50,9 +50,9 @@ spec:
       existingSecret: tunnel-credentials
       # Ingress hosts are directly copied into the configmap;
       # Read: https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress
-#      ingress:
-#        - hostname: api.raspbernetes.com
-#          service: tcp://kubernetes.default.svc.cluster.local:443
-#          originRequest:
-#            proxyType: socks
-#        - service: http_status:404
+      ingress:
+        - hostname: api.raspbernetes.com
+          service: tcp://kubernetes.default.svc.cluster.local:443
+          originRequest:
+            proxyType: socks
+        - service: http_status:404
