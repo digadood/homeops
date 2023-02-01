@@ -45,9 +45,9 @@ spec:
     persistence:
       config:
         enabled: true
-        existingClaim: appdata
-        mountPath: /config
-        subPath: sonarr
+        type: hostPath
+        hostPath: /opt/sonarr/config
+#        subPath: sonarr
       # give access to parent of download folder and tv directory destination
       # https://wiki.servarr.com/docker-guide
 #      media:
