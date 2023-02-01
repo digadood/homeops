@@ -27,9 +27,9 @@ spec:
     keepHistory: false
   values:
     global:
-      # nameOverride: cloudflared
-      annotations:
-        reloader.stakater.com/search: "true"
+       nameOverride: cloudflared
+#      annotations:
+#        reloader.stakater.com/search: "true"
         # configmap.reloader.stakater.com/reload: "k8s-argo-tunnel"
 
     controller:
