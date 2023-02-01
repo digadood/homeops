@@ -4,7 +4,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: &app cloudflared
+  name: &app cloudflared2
   namespace: networking
 spec:
   interval: 15m
@@ -51,7 +51,7 @@ spec:
       config:
         enabled: true
         type: hostPath
-        name: *app
+        name: cloudflared
         hostPath: /etc/cloudflared/config.yaml
 #        subPath: config.yaml
 #        readOnly: true
@@ -60,7 +60,7 @@ spec:
       tunnel:
         enabled: true
         type: hostPath
-        name: *app
+        name: tunnel
         hostPath: /etc/cloudflared/tunnel.json
 #        subPath: tunnel.json
 #        readOnly: true
