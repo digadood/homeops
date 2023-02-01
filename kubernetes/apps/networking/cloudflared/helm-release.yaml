@@ -1,106 +1,78 @@
-# https://github.com/cloudflare/cloudflared
-# https://github.com/cloudflare/argo-tunnel-examples/tree/master/terraform-gcp-gke-ingress-controller
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: &app cloudflared2
+  name: cloudflared
   namespace: networking
 spec:
   interval: 15m
   chart:
     spec:
+      # renovate: registryUrl=https://bjw-s.github.io/helm-charts
       chart: app-template
-      version: 1.2.0
+      version: 1.2.1
       sourceRef:
         kind: HelmRepository
-        name: bjw-s
+        name: bjw-s-charts
         namespace: flux-system
+  maxHistory: 3
   install:
     createNamespace: true
     remediation:
-      retries: 5
+      retries: 3
   upgrade:
     remediation:
-      retries: 5
+      retries: 3
+  uninstall:
+    keepHistory: false
   values:
-    priorityClassName: system-cluster-critical
+    global:
+      # nameOverride: cloudflared
+      annotations:
+        reloader.stakater.com/search: "true"
+        # configmap.reloader.stakater.com/reload: "k8s-argo-tunnel"
+
     controller:
-      replicas: 1
-    # Example: https://github.com/cloudflare/postgres-postgrest-cloudflared-example
+      type: deployment
+      replicas: 3
     image:
-      # https://hub.docker.com/r/cloudflare/cloudflared
       repository: cloudflare/cloudflared
-      tag: latest
-    env:
-      TZ: "${TIMEZONE}"
-    # Outbound traffic is proxied through port 8080
-    # https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/install-and-setup/tunnel-useful-terms/#configuration-file
-    # Arguments: https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/install-and-setup/tunnel-guide/local/local-management/arguments/#metrics
+      tag: 2023.1.0
     args:
       - tunnel
+      # provide path to config file, created by a ConfigMap below
       - --config
-      - /etc/cloudflared/config.yaml
-      - --metrics=0.0.0.0:3333
-      - --no-autoupdate
+      - /etc/cloudflared/config/config.yaml
       - run
+
+    ingress:
+      main:
+        enabled: false
     service:
       main:
         enabled: false
+
     persistence:
       config:
         enabled: true
-        type: hostPath
-        name: cloudflared
-        hostPath: /etc/cloudflared/config.yaml
-#        subPath: config.yaml
-#        readOnly: true
-      # Tunnel credentials setup:
-      # https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/install-and-setup/tunnel-guide/local/
-      tunnel:
+        type: configMap
+        name: k8s-argo-tunnel
+        mountPath: /etc/cloudflared/config
+      # By default, the credentials file will be created under ~/.cloudflared/<tunnel ID>.json
+      # when you run `cloudflared tunnel create`. You can move it into a secret by using:
+      # ```sh
+      # kubectl create secret generic tunnel-credentials \
+      # --from-file=credentials.json=/Users/yourusername/.cloudflared/<tunnel ID>.json
+      # ```
+      creds:
         enabled: true
-        type: hostPath
-        name: tunnel
-        hostPath: /etc/cloudflared/tunnel.json
-#        subPath: tunnel.json
-#        readOnly: true
-#    podAnnotations:
-#      configmap.reloader.stakater.com/reload: *app
-#      secret.reloader.stakater.com/reload: *app
-    probes:
-      liveness:
-        enabled: true
-        custom: true
-        spec:
-          initialDelaySeconds: 0
-          periodSeconds: 10
-          timeoutSeconds: 1
-          failureThreshold: 3
-          httpGet:
-            path: /ready
-            port: 3333
-            scheme: HTTP
-      readiness:
-        enabled: true
-        custom: true
-        spec:
-          initialDelaySeconds: 0
-          periodSeconds: 10
-          timeoutSeconds: 1
-          failureThreshold: 3
-          httpGet:
-            path: /ready
-            port: 3333
-            scheme: HTTP
-      startup:
-        enabled: true
-        custom: true
-        spec:
-          initialDelaySeconds: 0
-          timeoutSeconds: 1
-          periodSeconds: 5
-          failureThreshold: 30
-          httpGet:
-            path: /ready
-            port: 3333
-            scheme: HTTP
+        type: secret
+        name: tunnel-credentials
+        mountPath: /etc/cloudflared/creds
+
+    resources:
+      requests:
+        cpu: 25m
+        memory: 105M
+      limits:
+        memory: 105M
