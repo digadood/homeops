@@ -23,19 +23,15 @@ spec:
       defaultReplicaCount: 2
     pspEnable: false
     ingress:
-      main:
-        enabled: true
-        ingressClassName: nginx
-        annotations:
-          external-dns.alpha.kubernetes.io/target: "horn.${SECRET_DOMAIN}"
-          external-dns.home.arpa/enabled: "true"
-          hajimari.io/enable: "true"
-          hajimari.io/icon: bugle
-        hosts:
-          - host: &host "horn.${SECRET_DOMAIN}"
-            paths:
-              - path: /
-                pathType: Prefix
-        tls:
-          - hosts:
-              - *host
+      enabled: true
+      ingressClassName: nginx
+      host: "longhorn.${SECRET_DOMAIN}"
+      tls:
+        - hosts:
+            - *host
+      path: /
+      annotations:
+        nginx.ingress.kubernetes.io/whitelist-source-range: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
+        hajimari.io/enable: "true"
+        hajimari.io/icon: "cow"
+        hajimari.io/appName: "Longhorn"
