@@ -7,3 +7,5 @@ resources:
   - ./hajimari/ks.yaml
   - sonarr
   - radarr
+  - grocy
+
