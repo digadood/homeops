@@ -43,7 +43,7 @@ spec:
         enabled: true
         ingressClassName: nginx
         annotations:
-          external-dns.alpha.kubernetes.io/target: "radarr.${SECRET_DOMAIN}"
+          external-dns.alpha.kubernetes.io/target: "e3e2586f-d698-4a00-b118-9fc388cb7cef.cfargotunnel.com"
           external-dns.home.arpa/enabled: "true"
           hajimari.io/enable: "true"
           hajimari.io/icon: movie
