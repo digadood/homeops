@@ -1,0 +1,57 @@
+# https://github.com/linuxserver/docker-lidarr
+# notes on volumes: https://wiki.servarr.com/docker-guide#consistent-and-well-planned-paths
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: lidarr
+  namespace: default
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: app-template
+      version: 1.4.0
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+      interval: 1h
+  values:
+    image:
+      repository: ghcr.io/onedr0p/lidarr-develop
+      tag: 1.1.4.3027@sha256:abcc1cd8e474605091edfeca923e614224e4773a52b034fad99b32f08a2515cd
+    service:
+      main:
+        ports:
+          http:
+            port: 7878
+    persistence:
+      config:
+        enabled: true
+        type: hostPath
+        hostPath: /opt/lidarr/config
+#        subPath: lidarr
+      # give access to parent of download folder and tv directory destination
+      # https://wiki.servarr.com/docker-guide
+#      media:
+#        enabled: true
+#        existingClaim: media
+#        mountPath: /data
+    ingress:
+      main:
+        enabled: true
+        ingressClassName: nginx
+        annotations:
+          external-dns.alpha.kubernetes.io/target: "lidarr.${SECRET_DOMAIN}"
+          external-dns.home.arpa/enabled: "true"
+          hajimari.io/enable: "true"
+          hajimari.io/icon: music
+        hosts:
+          - host: &host "lidarr.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+        tls:
+          - hosts:
+              - *host
