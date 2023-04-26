@@ -8,4 +8,4 @@ resources:
   - sonarr
   - radarr
   - grocy
-
+  - lidarr
